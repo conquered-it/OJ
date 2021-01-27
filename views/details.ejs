@@ -1,0 +1,28 @@
+<h1><%=arr.title%></h1>
+<p><%=arr.statement%></p>
+<br><br>
+<%if(arr.checker){%>
+<form action="/problems/<%=arr._id%>/tests" method="POST">
+    <textarea name="input"></textarea>
+    <button>Add test</button>
+</form>
+<br><br>
+<%}else{%>
+<form action="/problems/<%=arr._id%>/checker" method="POST">
+    <textarea name="checker"></textarea>
+    <label>Choose Language</label>
+    <select name="lang">
+        <option value="7">C++</option>
+        <option value="6">C</option>
+        <option value="5">Python</option>
+        <option value="4">Java</option>
+    </select>
+    <button>Add Checker Code</button>
+</form>
+<%}%>
+<br><br>
+<a href="/">Home</a>
+<a href="/ide">IDE</a>
+<a href="/problems">Problems</a>
+<a href="/problems/new">New Problems</a>
+<a href="/submissions">Current submissions</a>
