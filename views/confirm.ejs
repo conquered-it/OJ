@@ -1,0 +1,8 @@
+<%if(data.Error){%>
+    <p><%=data.Error%></p>
+<%}else{%>
+    <form action="/problems/<%=id%>/tests" method="POST">
+        <input name="input" type="text" value="<%=data.Result%>" style="visibility:hidden;">
+        <button>Do you want to add this test?</button>
+    </form>
+<%}%>

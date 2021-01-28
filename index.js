@@ -7,7 +7,8 @@ mongoose = require("mongoose"),
 port = process.env.PORT || 3000;
 mongoose.set('useNewUrlParser', true);
 mongoose.connect("mongodb://localhost/oj",{ useUnifiedTopology: true });
-app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.set("view engine","ejs");
 app.use(express.static('views'));
 var jsdom = require('jsdom');
@@ -15,29 +16,15 @@ const { JSDOM } = jsdom;
 const { window } = new JSDOM();
 const { document } = (new JSDOM('')).window;
 global.document = document;
-
 var $ = jQuery = require('jquery')(window);
-
 var problemSchema = new mongoose.Schema({
-    title:String,
-    statement:String,
-    checker:String,
-    lang:String,
-    io:[{
-        input:String,
-        output:String
-    }],
-    submissions:[{
-        id:String,
-        verdict:String
-    }]
+    title:String,statement:String,checker:String,lang:String,
+    io:[{input:String,output:String}],
+    submissions:[{id:String,verdict:String}]
 })
 
 var submissionSchema = new mongoose.Schema({
-    problem_id:String,
-    problem_name:String,
-    content:String,
-    verdict:String
+    problem_id:String,problem_name:String,content:String,verdict:String
 })
 
 var problems = mongoose.model('problems',problemSchema);
@@ -85,7 +72,7 @@ app.post('/problems/:id/checker',function(req,res){
     problems.findById(req.params.id,function(err,ret){
         ret.checker=req.body.checker;
         ret.lang=req.body.lang;
-        ret.save()
+        ret.save();
     })
     res.redirect('/problems/'+req.params.id+'/edit');
 })
@@ -117,7 +104,7 @@ app.post('/problems/:id',function(req,res){
                 res.redirect('/submissions/'+sub._id);
             })
         }
-        ret.io.forEach(async function(x,index){
+        ret.io.forEach(function(x,index){
             setTimeout(function(){
                 var to_compile = {
                     "LanguageChoice": req.body.lang,
@@ -163,11 +150,26 @@ app.post('/problems/:id/tests',function(req,res){
             ret.io.push({input:req.body.input,output:data.Result});
             ret.save(function(err,fin){
                 if(err) console.log('err');
-                else console.log(fin);
             })
         });
     })
     res.redirect('/problems/'+req.params.id+'/edit');
+})
+
+app.post('/problems/:id/tests2',function(req,res){
+    var to_compile = {
+        "LanguageChoice": req.body.lang,
+        "Program": req.body.code,
+        "Input": req.body.input,
+        "CompilerArgs" : "-o a.out source_file.cpp"
+    };
+    $.ajax ({
+        url: "https://rextester.com/rundotnet/api",
+        type: "POST",
+        data: to_compile
+    }).done(function(data){
+        res.render('confirm',{data:data,id:req.params.id});
+    });
 })
 
 app.listen(port,function(){

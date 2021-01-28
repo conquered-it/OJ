@@ -3,10 +3,22 @@
 <br><br>
 <%if(arr.checker){%>
 <form action="/problems/<%=arr._id%>/tests" method="POST">
-    <textarea name="input"></textarea>
+    <textarea name="input" placeholder="Add test"></textarea>
     <button>Add test</button>
 </form>
-<br><br>
+<br><p>OR</p><br>
+<form action="/problems/<%=arr._id%>/tests2" method="POST">
+    <textarea name="code" cols="30" rows="10" placeholder="Generate test case using code"></textarea>
+    <textarea name="input" cols="20" rows="4" placeholder="input"></textarea>
+    <label>Choose Language</label>
+    <select name="lang">
+        <option value="7">C++</option>
+        <option value="6">C</option>
+        <option value="5">Python</option>
+        <option value="4">Java</option>
+    </select>
+    <button>Generate</button>
+</form>
 <%}else{%>
 <form action="/problems/<%=arr._id%>/checker" method="POST">
     <textarea name="checker"></textarea>
