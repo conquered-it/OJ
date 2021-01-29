@@ -3,7 +3,12 @@
 <form action="/login" method="POST">
 	<input type="text" name="username" placeholder="email">
 	<input type="password" name="password" placeholder="password">
-	<input type="text" name="role" placeholder="role">
+	<label>Choose Role</label>
+    <select name="role">
+        <option value="user">user</option>
+        <option value="author">author</option>
+        <option value="admin">admin</option>
+    </select>
 	<button>Login</button>
 </form>
 
