@@ -15,18 +15,18 @@ router.get('/problems',function(req,res){
     })
 })
 
-router.get('/problems/new',function(req,res){
+router.get('/problems/new',IsLoggedIn,is_author,function(req,res){
     res.render('new_problems');
 })
 
-router.post('/problems',function(req,res){
+router.post('/problems',IsLoggedIn,is_author,function(req,res){
     problems.create(req.body.problems,function(err,ret){
         if(err) console.log('err');
         else res.redirect('/problems/'+ret._id+'/edit');
     })
 })
 
-router.post('/problems/:id/checker',function(req,res){
+router.post('/problems/:id/checker',IsLoggedIn,is_author,function(req,res){
     problems.findById(req.params.id,function(err,ret){
         ret.checker=req.body.checker;
         ret.lang=req.body.lang;
@@ -47,7 +47,7 @@ router.get('/problems/:id/submissions',function(req,res){
     })
 })
 
-router.post('/problems/:id',function(req,res){
+router.post('/problems/:id',IsLoggedIn,is_user,function(req,res){
     problems.findById(req.params.id,function(err,ret){
         var ok=true,counter=0;
         function callback(ok,ret){
@@ -85,14 +85,14 @@ router.post('/problems/:id',function(req,res){
     })
 });
 
-router.get('/problems/:id/edit',function(req,res){
+router.get('/problems/:id/edit',IsLoggedIn,is_author,function(req,res){
     problems.findById(req.params.id,function(err,ret){
         if(err) console.log('err'),res.send({});
         else res.render('details',{arr:ret});
     })
 })
 
-router.post('/problems/:id/tests',function(req,res){
+router.post('/problems/:id/tests',IsLoggedIn,is_author,function(req,res){
     problems.findById(req.params.id,function(err,ret){
         var to_compile = {
             "LanguageChoice": ret.lang,
@@ -114,7 +114,7 @@ router.post('/problems/:id/tests',function(req,res){
     res.redirect('/problems/'+req.params.id+'/edit');
 })
 
-router.post('/problems/:id/tests2',function(req,res){
+router.post('/problems/:id/tests2',IsLoggedIn,is_author,function(req,res){
     var to_compile = {
         "LanguageChoice": req.body.lang,
         "Program": req.body.code,
@@ -129,4 +129,20 @@ router.post('/problems/:id/tests2',function(req,res){
         res.render('confirm',{data:data,id:req.params.id});
     });
 })
+
+function IsLoggedIn(req,res,next){
+	if(req.isAuthenticated()) return next();
+	res.redirect("/login");
+}
+
+function is_user(req,res,next){
+    if(req.user.role==='user') return next();
+    res.send('you are not allowed to view this page');
+}
+
+function is_author(req,res,next){
+    if(req.user.role==='author') return next();
+    else res.send('you are not allowed to view this page');
+}
+
 module.exports=router;
