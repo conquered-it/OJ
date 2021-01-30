@@ -23,6 +23,8 @@
 ## Added authorization
 * Passport package is used
 * 3 roles - user, author, admin
+* Only author can add/update problems
+* Only user can make submissions
  
 ## Incomplete features 
 * TLE/MLE/RTE cases not handled yet
