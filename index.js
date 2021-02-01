@@ -32,6 +32,7 @@ var problemRoute = require('./routes/problems');
 var submissionRoute = require('./routes/submissions');
 var authorizationRoute = require('./routes/authorization');
 var messageRoute = require('./routes/messages');
+var contestRoute = require('./routes/contests');
 app.use(homeRoute);
 app.use(problemRoute);
 app.use(submissionRoute);
@@ -41,6 +42,7 @@ app.use(function(req,res,next){
 })
 app.use(authorizationRoute);
 app.use(messageRoute);
+app.use(contestRoute);
 app.listen(port,function(){
     console.log('ok');
 })
