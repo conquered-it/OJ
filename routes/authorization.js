@@ -12,13 +12,18 @@ router.get("/register",function(req,res){
 })
 
 router.post("/register",function(req,res){
-    var username=req.body.username,role=req.body.role,key=username+"__$$__"+role,handle=req.body.handle;
-	User.register(new User({username:username,role:role,key:key,handle:handle}),req.body.password, function(err,user){
-		if(err) res.render('register');
-		passport.authenticate("local")(req,res,function(){
-			res.redirect('/auth');
-		})
-	})
+    var username=req.body.username,role=req.body.role,key=username+"__$$__"+role,handle=req.body.handle,handle_key=handle+"__$$__"+role;
+    User.findOne({handle_key:handle_key},function(err,ret){
+        if(ret) return res.redirect('/register');
+        else{
+            User.register(new User({username:username,role:role,key:key,handle:handle,handle_key:handle_key}),req.body.password, function(err,user){
+                if(err) res.render('register');
+                passport.authenticate("local")(req,res,function(){
+                    res.redirect('/auth');
+                })
+            })
+        }
+    })
 })
 
 router.get("/login",function(req,res){

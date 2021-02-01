@@ -1,4 +1,8 @@
-<h1>welcome to online judge</h1>
+<%users.forEach(function(x){%>
+    <div><%=x%></div>
+    <a href="/messages/<%=x._id%>/send">Send message to this user</a>
+<%})%>
+<br><br>
 <a href="/">Home</a>
 <a href="/ide">IDE</a>
 <a href="/problems">Problems</a>

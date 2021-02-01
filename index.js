@@ -31,6 +31,7 @@ var homeRoute = require('./routes/home');
 var problemRoute = require('./routes/problems');
 var submissionRoute = require('./routes/submissions');
 var authorizationRoute = require('./routes/authorization');
+var messageRoute = require('./routes/messages');
 app.use(homeRoute);
 app.use(problemRoute);
 app.use(submissionRoute);
@@ -39,7 +40,7 @@ app.use(function(req,res,next){
     next();
 })
 app.use(authorizationRoute);
-
+app.use(messageRoute);
 app.listen(port,function(){
     console.log('ok');
 })
