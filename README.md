@@ -25,7 +25,10 @@
 * 3 roles - user, author, admin
 * Only author can add/update problems
 * Only user can make submissions
- 
+
+## Messaging service
+* A user can send message to other
+
 ## Incomplete features 
 * TLE/MLE/RTE cases not handled yet
 * Queue feature not implemented yet
