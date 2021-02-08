@@ -6,6 +6,8 @@ var problemSchema = new mongoose.Schema({
     author:String,
     contest_id:String,
     access:String,
-    access_list:[String]
+    access_list:[String],
+    difficulty:Number,
+    tags:[String]
 })
 module.exports=mongoose.model('problems',problemSchema);

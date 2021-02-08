@@ -1,6 +1,7 @@
 <%submissions.forEach(function(x){%>
     <p>Id : <%=x._id%></p>
-    <p>Problem : <%=x.problem_name%> &nbsp;&nbsp; Verdict : <%=x.verdict%> </p>
+    <p>Submitted by : <strong><%=x.user%></strong> 
+        &nbsp;&nbsp; Problem : <%=x.problem_name%> &nbsp;&nbsp; Verdict : <%=x.verdict%> </p>
     <a href="/submissions/<%=x._id%>">Submission Link</a>
     <br><br>
 <%})%>

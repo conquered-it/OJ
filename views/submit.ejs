@@ -1,6 +1,12 @@
 <h1><%=problem.title%></h1>
 <p><%=problem.statement%></p>
 <br>
+<p><%=problem.difficulty%></p>
+<p><strong>Tags</strong></p>
+<%problem.tags.forEach(function(x){%>
+    <p><%=x%></p>
+<%})%>
+<br><br>
 <form action="/problems/<%=problem._id%>" method="POST">
     <textarea name="code" id="" cols="30" rows="10" placeholder="Code"></textarea>
     <label>Choose Language</label>

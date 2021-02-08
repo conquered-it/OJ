@@ -55,7 +55,8 @@ router.post('/problems/:id',IsLoggedIn,is_user,function(req,res){
                 problem_id:ret._id,
                 problem_name:ret.title,
                 content:req.body.code,
-                verdict:(ok?"accepted":"wrong answer")
+                verdict:(ok?"accepted":"wrong answer"),
+                user:req.user.handle
             },function(err,sub){
                 ret.submissions.push({id:sub._id,verdict:sub.verdict});
                 ret.save();
@@ -128,6 +129,22 @@ router.post('/problems/:id/tests2',IsLoggedIn,is_author,function(req,res){
     }).done(function(data){
         res.render('confirm',{data:data,id:req.params.id});
     });
+})
+
+router.post('/problems/:id/difficulty',IsLoggedIn,is_author,function(req,res){
+    problems.findById(req.params.id,function(err,ret){
+        ret.difficulty=req.body.difficulty;
+        ret.save();
+    })
+    res.redirect('/problems/'+req.params.id+'/edit');
+})
+
+router.post('/problems/:id/tags',IsLoggedIn,is_author,function(req,res){
+    problems.findById(req.params.id,function(err,ret){
+        ret.tags.push(req.body.tags);
+        ret.save();
+    })
+    res.redirect('/problems/'+req.params.id+'/edit');
 })
 
 function IsLoggedIn(req,res,next){

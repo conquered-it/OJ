@@ -1,11 +1,22 @@
 <h1><%=arr.title%></h1>
 <p><%=arr.statement%></p>
 <br><br>
+<form action="/problems/<%=arr._id%>/tags" method="POST">
+    <input type="text" name="tags" placeholder="ADD TAG">
+    <button>Submit</button>
+</form>
+
+<form action="/problems/<%=arr._id%>/difficulty" method="POST">
+    <input type="number" name="difficulty" placeholder="ADD DIFFICULTY">
+    <button>Submit</button>
+</form>
+
 <%if(arr.checker){%>
 <form action="/problems/<%=arr._id%>/tests" method="POST">
     <textarea name="input" placeholder="Add test"></textarea>
     <button>Add test</button>
 </form>
+
 <br><p>OR</p><br>
 <form action="/problems/<%=arr._id%>/tests2" method="POST">
     <textarea name="code" cols="30" rows="10" placeholder="Generate test case using code"></textarea>
