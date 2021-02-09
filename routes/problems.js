@@ -2,6 +2,7 @@ var express=require('express');
 var router=express.Router();
 var problems = require('../models/problems');
 var submissions = require('../models/submissions');
+var User = require('../models/user');
 var jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 const { window } = new JSDOM();
@@ -22,15 +23,22 @@ router.get('/problems/new',IsLoggedIn,is_author,function(req,res){
 router.post('/problems',IsLoggedIn,is_author,function(req,res){
     problems.create(req.body.problems,function(err,ret){
         if(err) console.log('err');
-        else res.redirect('/problems/'+ret._id+'/edit');
+        else{
+            ret.access_list.push(req.user._id);
+            ret.save();
+            res.redirect('/problems/'+ret._id+'/edit');
+        }
     })
 })
 
 router.post('/problems/:id/checker',IsLoggedIn,is_author,function(req,res){
     problems.findById(req.params.id,function(err,ret){
-        ret.checker=req.body.checker;
-        ret.lang=req.body.lang;
-        ret.save();
+        if(!ret.access_list.includes(req.user._id)) res.send('not allowed');
+        else{
+            ret.checker=req.body.checker;
+            ret.lang=req.body.lang;
+            ret.save();
+        }
     })
     res.redirect('/problems/'+req.params.id+'/edit');
 })
@@ -88,8 +96,24 @@ router.post('/problems/:id',IsLoggedIn,is_user,function(req,res){
 
 router.get('/problems/:id/edit',IsLoggedIn,is_author,function(req,res){
     problems.findById(req.params.id,function(err,ret){
-        if(err) console.log('err'),res.send({});
+        if(!ret.access_list.includes(req.user._id)) res.send('not allowed');
         else res.render('details',{arr:ret});
+    })
+})
+
+router.post('/problems/:id/edit',IsLoggedIn,is_author,function(req,res){
+    problems.findById(req.params.id,function(err,ret){
+        if(!ret.access_list.includes(req.user._id)) res.send('not allowed');
+        else{
+            User.findOne({handle_key:req.body.name+'__$$__author'},function(err,user){
+                if(!user) res.send('No such author found');
+                else{
+                    ret.access_list.push(user._id);
+                    ret.save();
+                    res.redirect('/problems/'+req.params.id+'/edit');
+                }
+            })
+        }
     })
 })
 

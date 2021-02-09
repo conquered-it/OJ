@@ -44,6 +44,12 @@
 </form>
 <%}%>
 <br><br>
+<form action="/problems/<%=arr._id%>/edit" method="POST">
+    <p>Give Access To: </p>
+    <input type="text" name="name" placeholder="name">
+    <button>Submit</button>
+</form>
+<br><br>
 <a href="/">Home</a>
 <a href="/ide">IDE</a>
 <a href="/problems">Problems</a>
