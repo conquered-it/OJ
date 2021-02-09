@@ -1,5 +1,6 @@
 var express=require('express');
 var router=express.Router();
+var moment = require('moment');
 // var Users = require('../models/user');
 var problems = require('../models/problems');
 var contests = require('../models/contests');
@@ -23,7 +24,6 @@ router.get('/contests/:id',function(req,res){
 
 router.post('/contests',function(req,res){
     contests.create({id:req.body.id},function(err,ret){
-        console.log(ret);
         res.redirect('/contests/'+ret._id);
     })
 })
@@ -44,6 +44,12 @@ router.post('/contests/:id',function(req,res){
             res.redirect('/problems/'+ret._id+'/edit');
         });
     });
+})
+
+router.post('/contests/:id/time',function(req,res){
+    console.log(moment(req.body.start,"YYYY-MM-DDThh:mm").fromNow());
+    console.log(req.body.end);
+    res.send({});
 })
 
 module.exports=router;

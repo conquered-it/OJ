@@ -7,17 +7,23 @@
     <p><%=x%></p>
 <%})%>
 <br><br>
-<form action="/problems/<%=problem._id%>" method="POST">
-    <textarea name="code" id="" cols="30" rows="10" placeholder="Code"></textarea>
-    <label>Choose Language</label>
-    <select name="lang">
-        <option value="7">C++</option>
-        <option value="6">C</option>
-        <option value="5">Python</option>
-        <option value="4">Java</option>
-    </select>
-    <button>Submit</button>
-</form>
+<%if(!User){%>
+    <a href="/login">Login</a>
+<%}else if(User.role==='user'){%>
+    <form action="/problems/<%=problem._id%>" method="POST">
+        <textarea name="code" id="" cols="30" rows="10" placeholder="Code"></textarea>
+        <label>Choose Language</label>
+        <select name="lang">
+            <option value="7">C++</option>
+            <option value="6">C</option>
+            <option value="5">Python</option>
+            <option value="4">Java</option>
+        </select>
+        <button>Submit</button>
+    </form>
+<%}else{%>
+    <a href='/problems/<%=problem._id%>/edit'>Edit Problem</a>
+<%}%>
 <br>
 <a href="/problems/<%=problem._id%>/submissions">Submissions of this problem</a>
 <br><br>

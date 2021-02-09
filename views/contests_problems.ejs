@@ -1,5 +1,16 @@
-<%problems.forEach(function(x){%>
-    <a href="/problems/<%=x._id%>"><%=x.title%></a>
+<%problems.forEach(function(x,index){%>
+    <a href="/problems/<%=x%>">Problem &nbsp;<%=index+1%></a>
+    <br>
 <%})%>
 
+
 <a href="/contests/<%=id%>/add">Add problems to this contest</a>
+<br><br>
+<form action='/contests/<%=id%>/time' method="POST">
+    <p>Add Start and End time of contest</p>
+    Start Time: <input type="datetime-local" name="start">
+    <br>
+    End Time: <input type="datetime-local" name="end">
+    <br>
+    <button>Submit</button>
+</form>

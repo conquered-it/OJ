@@ -45,7 +45,7 @@ router.post('/problems/:id/checker',IsLoggedIn,is_author,function(req,res){
 
 router.get('/problems/:id',function(req,res){
     problems.findById(req.params.id,function(err,ret){
-        res.render('submit',{problem:ret});
+        res.render('submit',{User:req.user,problem:ret});
     })
 })
 
