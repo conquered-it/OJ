@@ -4,7 +4,6 @@ var problemSchema = new mongoose.Schema({
     io:[{input:String,output:String}],
     submissions:[{id:String,verdict:String}],
     author:String,
-    contest_id:String,
     access:String,
     access_list:[String],
     difficulty:Number,

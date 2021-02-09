@@ -3,7 +3,7 @@ var router=express.Router();
 // var Users = require('../models/user');
 var problems = require('../models/problems');
 var contests = require('../models/contests');
-
+// var {contests,problems} = require('../models/problems');
 router.get('/contests',function(req,res){
     contests.find({},function(err,ret){
         res.render('contests',{contests:ret});
@@ -15,8 +15,8 @@ router.get('/contests/new',function(req,res){
 })
 
 router.get('/contests/:id',function(req,res){
-    problems.find({contest_id:req.params.id},function(err,ret){
-        res.render('contests_problems',{problems:ret,id:req.params.id});
+    contests.findById(req.params.id,function(err,ret){
+        res.render('contests_problems',{id:req.params.id,problems:ret.problems});
     })
 })
 
@@ -34,9 +34,15 @@ router.get('/contests/:id/add',function(req,res){
 
 router.post('/contests/:id',function(req,res){
     var title=req.body.title,statement=req.body.statement,id=req.params.id;
-    problems.create({title:title,statement:statement,contest_id:id},function(err,ret){
-        console.log(ret);
-        res.redirect('/problems/'+ret._id+'/edit');
+    problems.create({title:title,statement:statement},function(err,ret){
+        ret.access_list.push(req.user.id);
+        ret.save(function(err,ret){
+            contests.findById(req.params.id,function(err,contest){
+                contest.problems.push(ret);
+                contest.save();
+            })
+            res.redirect('/problems/'+ret._id+'/edit');
+        });
     });
 })
 
