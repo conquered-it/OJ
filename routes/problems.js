@@ -57,13 +57,18 @@ router.get('/problems/:id/submissions',function(req,res){
 
 router.post('/problems/:id',IsLoggedIn,is_user,function(req,res){
     problems.findById(req.params.id,function(err,ret){
-        var ok=true,counter=0;
+        var ok=1,counter=0;
         function callback(ok,ret){
+            var verdict="";
+            if(ok==0) verdict="Wrong Answer";
+            else if(ok==1) verdict="Accepted";
+            else if(ok==2) verdict="Compilation Error";
+            else verdict="Time Limit Exceeded";
             submissions.create({
                 problem_id:ret._id,
                 problem_name:ret.title,
                 content:req.body.code,
-                verdict:(ok?"accepted":"wrong answer"),
+                verdict:verdict,
                 user:req.user.handle
             },function(err,sub){
                 ret.submissions.push({id:sub._id,verdict:sub.verdict});
@@ -74,22 +79,32 @@ router.post('/problems/:id',IsLoggedIn,is_user,function(req,res){
         ret.io.forEach(function(x,index){
             setTimeout(function(){
                 var to_compile = {
-                    "LanguageChoice": req.body.lang,
-                    "Program": req.body.code,
-                    "Input": x.input,
-                    "CompilerArgs" : "-o a.out source_file.cpp"
+                    "source_code": req.body.code,
+                    "language": req.body.lang,
+                    "input": x.input,
+                    "api_key" : "guest"
                 };
                 $.ajax ({
-                    url: "https://rextester.com/rundotnet/api",
+                    url: "http://api.paiza.io:80/runners/create",
                     type: "POST",
-                    data: to_compile
-                }).done(function(data) {
-                    if(x.output===data.Result);
-                    else ok=false;
-                    ++counter;
-                    if(counter==ret.io.length) callback(ok,ret);
-                });
-            },1500*index);
+                    data: to_compile,
+                }).done(function(data){
+                    function temp(){
+                        $.ajax({
+                            url:"http://api.paiza.io:80/runners/get_details?id="+data.id+"&api_key=guest",
+                            type:"GET"
+                        }).done(function(data){
+                            if(data.result === "timeout" || data.status === "running") ok=3;
+                            else if(data.build_stderr || data.stderr) ok=2;
+                            else if(x.output===data.stdout);
+                            else ok=0;
+                            ++counter;
+                            if(counter==ret.io.length) callback(ok,ret);
+                        })
+                    }
+                    setTimeout(temp,2000);
+                })
+            });
         })
     })
 });
@@ -120,39 +135,55 @@ router.post('/problems/:id/edit',IsLoggedIn,is_author,function(req,res){
 router.post('/problems/:id/tests',IsLoggedIn,is_author,function(req,res){
     problems.findById(req.params.id,function(err,ret){
         var to_compile = {
-            "LanguageChoice": ret.lang,
-            "Program": ret.checker,
-            "Input": req.body.input,
-            "CompilerArgs" : "-o a.out source_file.cpp"
+            "source_code": ret.checker,
+            "language": ret.lang,
+            "input": req.body.input,
+            "api_key" : "guest"
         };
         $.ajax ({
-            url: "https://rextester.com/rundotnet/api",
+            url: "http://api.paiza.io:80/runners/create",
             type: "POST",
-            data: to_compile
+            data: to_compile,
         }).done(function(data) {
-            ret.io.push({input:req.body.input,output:data.Result});
-            ret.save(function(err,fin){
-                if(err) console.log('err');
-            })
-        });
+            function temp(){
+                $.ajax({
+                    url:"http://api.paiza.io:80/runners/get_details?id="+data.id+"&api_key=guest",
+                    type:"GET"
+                }).done(function(data){
+                    ret.io.push({input:req.body.input,output:data.stdout});
+                    ret.save(function(err,fin){
+                        if(err) console.log('err');
+                    })
+                })
+            }
+            setTimeout(temp,2000);
+        })
     })
     res.redirect('/problems/'+req.params.id+'/edit');
 })
 
 router.post('/problems/:id/tests2',IsLoggedIn,is_author,function(req,res){
     var to_compile = {
-        "LanguageChoice": req.body.lang,
-        "Program": req.body.code,
-        "Input": req.body.input,
-        "CompilerArgs" : "-o a.out source_file.cpp"
+        "source_code": req.body.code,
+        "language": req.body.lang,
+        "input": req.body.input,
+        "api_key" : "guest"
     };
     $.ajax ({
-        url: "https://rextester.com/rundotnet/api",
+        url: "http://api.paiza.io:80/runners/create",
         type: "POST",
-        data: to_compile
+        data: to_compile,
     }).done(function(data){
-        res.render('confirm',{data:data,id:req.params.id});
-    });
+        function temp(){
+            $.ajax({
+                url:"http://api.paiza.io:80/runners/get_details?id="+data.id+"&api_key=guest",
+                type:"GET"
+            }).done(function(data){ 
+                res.render('confirm',{data:data,id:req.params.id});
+            })
+        }
+        setTimeout(temp,2000);
+    })
 })
 
 router.post('/problems/:id/difficulty',IsLoggedIn,is_author,function(req,res){

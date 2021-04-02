@@ -8,26 +8,35 @@
     <script>
     $(document).ready(function(){
         $("button").click(function(){
-
 		    var to_compile = {
-			    "LanguageChoice": $("#lang").val(),
-			    "Program": $("#code").val(),
-			    "Input": $("#input").val(),
-			    "CompilerArgs" : "-o a.out source_file.cpp"
+                "source_code": $("#code").val(),
+                "language": $("#lang").val(),
+                "input": $("#input").val(),
+			    "api_key":"guest"
 		    };
-
 		    $.ajax ({
-			        url: "https://rextester.com/rundotnet/api",
+			        url: "http://api.paiza.io:80/runners/create",
 			        type: "POST",
-			        data: to_compile
+			        data: to_compile,
 			    }).done(function(data) {
-                    var temp="";
-                    if(data.Warnings) temp+=data.Warnings+"\n";
-                    if (data.Errors) temp+=data.Errors+"\n";
-                    if(data.Result) temp+="Output: "+data.Result+"\n";
-                    temp+="\n"+data["Stats"];
-                    $("#output").val(temp);
-                    $.ajax({url:"/result",type:"POST",data:data});
+                    function temp(){
+                        $.ajax({
+                            url:"http://api.paiza.io:80/runners/get_details?id="+data.id+"&api_key=guest",
+                            type:"GET"
+                        }).done(function(data){
+                            var output="";
+                            if(data.build_stderr) output+="error: " + data.build_stderr + "\n";
+                            else if(data.stderr) output+="error: " + data.build_stderr + "\n";
+                            else if(data.result==="timeout" || data.status==="running") output+="Time Limit Exceeded\n";
+                            else{
+                                output+="Output:\n" + data.stdout+"\n";
+                                output+="Time: " + data.time+" s\n";
+                            }
+                            $("#output").val(output); console.log(to_compile);
+                            // $.ajax({url:"/result",type:"POST",data:data});
+                        })
+                    }
+                    setTimeout(temp,2000);
 			    }).fail(function(data, err) {
 			        alert("fail " + JSON.stringify(data) + " " + JSON.stringify(err));
 		        });
@@ -37,10 +46,10 @@
     </head>
     <label>Choose Language</label>
     <select id="lang">
-        <option value="7">C++</option>
-        <option value="6">C</option>
-        <option value="5">Python</option>
-        <option value="4">Java</option>
+        <option value="cpp">C++</option>
+        <option value="c">C</option>
+        <option value="python">Python</option>
+        <option value="java">Java</option>
     </select>
     <textarea id="code" cols="75" rows="25" placeholder="code"></textarea>
     <textarea id="input" cols="45" rows="10" placeholder="input" style="position:relative;left:20px;bottom:220px"></textarea>

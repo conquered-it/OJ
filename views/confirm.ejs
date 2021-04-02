@@ -1,8 +1,8 @@
-<%if(data.Error){%>
-    <p><%=data.Error%></p>
+<%if(data.stderr || data.build_stderr || data.result==="timeout" || data.status==="running"){%>
+    <p>Somethig went wrong, please check your source code</p>
 <%}else{%>
     <form action="/problems/<%=id%>/tests" method="POST">
-        <input name="input" type="text" value="<%=data.Result%>" style="visibility:hidden;">
+        <input name="input" type="text" value="<%=data.stdout%>" style="visibility:hidden;">
         <button>Do you want to add this test?</button>
     </form>
 <%}%>
