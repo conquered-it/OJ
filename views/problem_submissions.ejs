@@ -1,3 +1,3 @@
-<%problem.submissions.forEach(function(x){%>
-    <p><%=x.id%> &nbsp;&nbsp; <%=x.verdict%> &nbsp;&nbsp; <a href="/submissions/<%=x.id%>">Link</a></p>
+<%submissions.forEach(function(x){%>
+    <p><%=x._id%> &nbsp;&nbsp; <a href="/submissions/<%=x._id%>">Link</a></p>
 <%})%>

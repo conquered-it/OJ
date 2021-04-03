@@ -51,7 +51,7 @@ router.get('/problems/:id',function(req,res){
 
 router.get('/problems/:id/submissions',function(req,res){
     problems.findById(req.params.id,function(err,ret){
-        res.render('problem_submissions',{problem:ret});
+        res.render('problem_submissions',{submissions:ret.submissions});
     })
 })
 
@@ -71,7 +71,7 @@ router.post('/problems/:id',IsLoggedIn,is_user,function(req,res){
                 verdict:verdict,
                 user:req.user.handle
             },function(err,sub){
-                ret.submissions.push({id:sub._id,verdict:sub.verdict});
+                ret.submissions.push(sub);
                 ret.save();
                 res.redirect('/submissions/'+sub._id);
             })
