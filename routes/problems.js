@@ -9,6 +9,9 @@ const { window } = new JSDOM();
 const { document } = (new JSDOM('')).window;
 global.document = document;
 var $ = jQuery = require('jquery')(window);
+
+var queue=[];
+
 router.get('/problems',function(req,res){
     problems.find({},function(err,problems){
         if(err) console.log(err),res.send({});
@@ -55,56 +58,76 @@ router.get('/problems/:id/submissions',function(req,res){
     })
 })
 
+function dequeue(){
+    return new Promise((resolve,reject)=>{
+        setTimeout(()=>{
+            var sub=queue.shift();
+            problems.findById(sub.problem_id,function(err,ret){
+                var ok=1,counter=0;
+                function callback(ok,ret){
+                    var verdict="";
+                    if(ok==0) verdict="Wrong Answer";
+                    else if(ok==1) verdict="Accepted";
+                    else if(ok==2) verdict="Compilation Error";
+                    else verdict="Time Limit Exceeded";
+                    submissions.findByIdAndUpdate(sub._id,{verdict:verdict},function(err,nw){})   
+                }
+                ret.io.forEach(function(x,index){
+                    var to_compile = {
+                        "source_code": sub.content,
+                        "language": sub.language,
+                        "input": x.input,
+                        "api_key" : "guest"
+                    };
+                    $.ajax ({
+                        url: "http://api.paiza.io:80/runners/create",
+                        type: "POST",
+                        data: to_compile,
+                    }).done(function(data){
+                        function temp(){
+                            $.ajax({
+                                url:"http://api.paiza.io:80/runners/get_details?id="+data.id+"&api_key=guest",
+                                type:"GET"
+                            }).done(function(data){
+                                if(data.result === "timeout" || data.status === "running") ok=3;
+                                else if(data.build_stderr || data.stderr) ok=2;
+                                else if(x.output===data.stdout);
+                                else ok=0;
+                                ++counter;
+                                if(counter==ret.io.length) callback(ok,ret);
+                            })
+                        }
+                        setTimeout(temp,2000);
+                    });
+                })
+            })
+            resolve();
+        },2000)   
+    })
+}
+
+async function enqueue(element){
+    queue.push(element);
+    if(queue.length>1) return;
+    while(queue.length!=0){
+        await dequeue();
+    }
+}
+
 router.post('/problems/:id',IsLoggedIn,is_user,function(req,res){
     problems.findById(req.params.id,function(err,ret){
-        var ok=1,counter=0;
-        function callback(ok,ret){
-            var verdict="";
-            if(ok==0) verdict="Wrong Answer";
-            else if(ok==1) verdict="Accepted";
-            else if(ok==2) verdict="Compilation Error";
-            else verdict="Time Limit Exceeded";
-            submissions.create({
-                problem_id:ret._id,
-                problem_name:ret.title,
-                content:req.body.code,
-                verdict:verdict,
-                user:req.user.handle
-            },function(err,sub){
-                ret.submissions.push(sub);
-                ret.save();
-                res.redirect('/submissions/'+sub._id);
-            })
-        }
-        ret.io.forEach(function(x,index){
-            setTimeout(function(){
-                var to_compile = {
-                    "source_code": req.body.code,
-                    "language": req.body.lang,
-                    "input": x.input,
-                    "api_key" : "guest"
-                };
-                $.ajax ({
-                    url: "http://api.paiza.io:80/runners/create",
-                    type: "POST",
-                    data: to_compile,
-                }).done(function(data){
-                    function temp(){
-                        $.ajax({
-                            url:"http://api.paiza.io:80/runners/get_details?id="+data.id+"&api_key=guest",
-                            type:"GET"
-                        }).done(function(data){
-                            if(data.result === "timeout" || data.status === "running") ok=3;
-                            else if(data.build_stderr || data.stderr) ok=2;
-                            else if(x.output===data.stdout);
-                            else ok=0;
-                            ++counter;
-                            if(counter==ret.io.length) callback(ok,ret);
-                        })
-                    }
-                    setTimeout(temp,2000);
-                })
-            });
+        submissions.create({
+            problem_id:ret._id,
+            problem_name:ret.title,
+            content:req.body.code,
+            language:req.body.lang,
+            verdict:"Queued...(Reload the page to check updates)",
+            user:req.user.handle
+        },function(err,sub){
+            ret.submissions.push(sub);
+            ret.save();
+            enqueue(sub);
+            res.redirect('/submissions/'+sub._id);
         })
     })
 });
