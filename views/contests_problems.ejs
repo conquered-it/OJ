@@ -1,16 +1,35 @@
-<%problems.forEach(function(x,index){%>
-    <a href="/problems/<%=x%>">Problem &nbsp;<%=index+1%></a>
-    <br>
-<%})%>
+<%if( (user && user.username===contest.owner) || contest.access==="all_users"){%>
+    <%contest.problems.forEach(function(x,index){%>
+        <a href="/problems/<%=x%>">Problem &nbsp;<%=index+1%></a>
+        <br>
+    <%})%>
+    <% if(TIME < contest.end ){ %>
+        <p>Contest will end on <%=contest.end%> (IST)</p>
+    <%}else{%>
+        <p>Contest has ended</p>
+    <%}%>
+<%}else{%>
+    <p>Contest will start on <%=contest.start%> (IST)</p>
+    <p>and will end on <%=contest.end%> (IST)</p>
+    <p>Go to <a href="/problems">Problems Page </a> for practice</p>
+    <p>If you are the contest administrator, <a href="/login">login </a> to continue</p>
+<%}%>
 
-
-<a href="/contests/<%=id%>/add">Add problems to this contest</a>
-<br><br>
-<form action='/contests/<%=id%>/time' method="POST">
-    <p>Add Start and End time of contest</p>
-    Start Time: <input type="datetime-local" name="start">
-    <br>
-    End Time: <input type="datetime-local" name="end">
-    <br>
-    <button>Submit</button>
+<%if(user && user.username===contest.owner){%>
+    <a href="/contests/<%=id%>/add">Create and Add problems to this contest</a>
+    <br>OR<br>
+    <form action="/contests/<%=id%>/id" method="POST">
+        <p>Enter problem id to add in contest: </p>
+        <input type="text" name='id'>
+        <button>Submit</button>
+    </form>
+    <br><br>
+    <form action='/contests/<%=id%>/time' method="POST">
+        <p>Add Start and End time of contest</p>
+        Start Time: <input type="datetime-local" name="start">
+        <br>
+        End Time: <input type="datetime-local" name="end">
+        <br>
+        <button>Submit</button>
+<%}%>
 </form>

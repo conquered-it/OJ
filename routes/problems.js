@@ -13,7 +13,7 @@ var $ = jQuery = require('jquery')(window);
 var queue=[];
 
 router.get('/problems',function(req,res){
-    problems.find({},function(err,problems){
+    problems.find({access:"all_users"},function(err,problems){
         if(err) console.log(err),res.send({});
         else res.render('problems',{problems:problems})
     })
@@ -143,14 +143,21 @@ router.post('/problems/:id/edit',IsLoggedIn,is_author,function(req,res){
     problems.findById(req.params.id,function(err,ret){
         if(!ret.access_list.includes(req.user._id)) res.send('not allowed');
         else{
-            User.findOne({handle_key:req.body.name+'__$$__author'},function(err,user){
-                if(!user) res.send('No such author found');
-                else{
-                    ret.access_list.push(user._id);
-                    ret.save();
-                    res.redirect('/problems/'+req.params.id+'/edit');
-                }
-            })
+            if(req.body.name==="all_users"){
+                ret.access="all_users";
+                ret.save();
+                res.redirect('/problems/'+req.params.id+'/edit');
+            }
+            else{
+                User.findOne({handle_key:req.body.name+'__$$__author'},function(err,user){
+                    if(!user) res.send('No such author found');
+                    else{
+                        ret.access_list.push(user._id);
+                        ret.save();
+                        res.redirect('/problems/'+req.params.id+'/edit');
+                    }
+                })
+            }
         }
     })
 })

@@ -1,4 +1,25 @@
+<p>Running Contests</p>
 <%contests.forEach(function(x){%>
-    <a href="/contests/<%=x._id%>"><%=x.id%></a>
-    <br>
+    <%if( TIME >= x.start && TIME <= x.end){%>
+        <a href="/contests/<%=x._id%>"><%=x.id%></a>
+        <br>
+    <%}%>
+<%})%>
+<br><br>
+
+<p>Upcoming Contests</p>
+<%contests.forEach(function(x){%>
+    <%if(TIME < x.start){%>
+        <a href="/contests/<%=x._id%>"><%=x.id%></a>
+        <br>
+    <%}%>
+<%})%>
+<br><br>
+
+<p>Past Contests</p>
+<%contests.forEach(function(x){%>
+    <%if(x.end < TIME){%> 
+        <a href="/contests/<%=x._id%>"><%=x.id%></a>
+        <br>
+    <%}%>
 <%})%>
