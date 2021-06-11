@@ -12,8 +12,7 @@
     var trie=new AutoComplete();
     $(document).ready(function(){
         $("#code").on("keypress",function(e){
-            console.log(e.currentTarget.selectionStart.clientX);
-            // console.log(e.currentTarge);
+            // console.log(e.currentTarget.selectionStart);
             if(e.key==" " || e.keyCode==13){
                 if(str!="") trie.add(str);
                 str="";
@@ -30,7 +29,7 @@
                 var cnt=0;
                 $("#suggestions").html(nw);
                 // set pos
-                if(sugg && sugg.length>0) {$("#suggestions").attr("style","visibility:visible"); $("#suggestions").insertAfter(e);}
+                if(sugg && sugg.length>0) $("#suggestions").attr("style","visibility:visible");
             }
         })
 
