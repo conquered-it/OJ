@@ -1,13 +1,47 @@
 <!DOCTYPE html>
 <html>
 <body>
-
     <head>
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <!-- <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
     <script>
+    class TrieNode{constructor(e){this.char=e,this.validWord=!1,this.parent=null,this.children=[]}}class AutoComplete{constructor(){this.root=new TrieNode("")}add(e){let t=this.root;for(let r=0;r<e.length;r+=1){const n=e[r];let l=!1;for(let e=0;e<t.children.length;e+=1){const r=t.children[e];if(r.char===n){l=!0,t=r;break}}if(!l){t.children.push(new TrieNode(n));const e=t.children[t.children.length-1];e.parent=t,t=e}}t.validWord=!0}contains(e){let t=this.root;for(let r=0;r<e.length;r+=1){const n=e[r];let l=!1;for(let e=0;e<t.children.length;e+=1){const r=t.children[e];if(r.char===n){l=!0,t=r;break}}if(!l)return!1}return t.validWord}delete(e){let t=this.root;for(let r=0;r<e.length;r+=1){const n=e[r];let l=!1;for(let e=0;e<t.children.length;e+=1){const r=t.children[e];if(r.char===n){l=!0,t=r;break}}if(!l)return}t.validWord=!1;let r=!1;for(;!r;)if(0===t.children.length&&!t.validWord&&t.parent){const{parent:e}=t,r=e.children.indexOf(t),n=e.children.length-1;[e.children[r],e.children[n]]=[e.children[n],e.children[r]],e.children.pop(),t=e}else r=!0}suggest(e){const t=e.split("");let r=this.root;for(let e=0;e<t.length;e+=1){const n=t[e];let l=!1;for(let e=0;e<r.children.length;e+=1){const t=r.children[e];if(t.char===n){l=!0,r=t;break}}if(!l)return[]}const n=[],l=[];return function r(i){if(l.push(i.char),i.validWord){const r=t.slice(0,e.length-1);r.push(...l),n.push(r.join(""))}i.children.forEach(e=>setTimeout(r(e),0)),l.pop()}(r),n}}
+    var str="",nw="";
+    var sugg;
+    var trie=new AutoComplete();
     $(document).ready(function(){
+        $("#code").on("keypress",function(e){
+            console.log(e.currentTarget.selectionStart.clientX);
+            // console.log(e.currentTarge);
+            if(e.key==" " || e.keyCode==13){
+                if(str!="") trie.add(str);
+                str="";
+                $("#suggestions").html("<option> </option>");
+                $("#suggestions").attr("style","visibility:hidden");
+            }
+            else{
+                str+=e.key;
+                sugg=trie.suggest(str);
+                nw="<option>" +""+ "</option>";
+                for(var it of sugg){
+                    nw+="<option>" + it + "</option>";
+                }
+                var cnt=0;
+                $("#suggestions").html(nw);
+                // set pos
+                if(sugg && sugg.length>0) {$("#suggestions").attr("style","visibility:visible"); $("#suggestions").insertAfter(e);}
+            }
+        })
+
+        $("#suggestions").change(function(){
+            var x = $("#code").val();
+            $("#code").val(x.substring(0,x.length-str.length-1)+' '+($("#suggestions").val()));
+            str="";
+            $("#suggestions").html("<option> </option>");
+            $("#suggestions").attr("style","visibility:hidden");
+        });
+
         $("button").click(function(){
 		    var to_compile = {
                 "source_code": $("#code").val(),
@@ -53,8 +87,9 @@
         <option value="java">Java</option>
     </select>
     <textarea id="code" cols="75" rows="25" placeholder="code"></textarea>
+    <select id="suggestions" style="visibility:hidden"></select>
     <textarea id="input" cols="45" rows="10" placeholder="input" style="position:relative;left:20px;bottom:220px"></textarea>
-    <textarea id="output" cols="45" rows="10" placeholder="output" style="position: relative;left:825px;bottom:190px"></textarea>
+    <textarea id="output" cols="45" rows="10" placeholder="output" style="position: relative;left:790px;bottom:190px"></textarea>
     <button id="run" style="position:relative;bottom:110px">Run</button>
     <br><br>
     <a href="/">Home</a>
